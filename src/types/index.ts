@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 export interface SQLQuery {
   id: string;
   naturalLanguage: string;
@@ -6,38 +8,17 @@ export interface SQLQuery {
   timestamp: Date;
 }
 
-export interface VisualizationType {
+export interface MessageHistory {
   id: string;
-  name: string;
-  icon: string;
+  role: 'user' | 'assistant' | 'error';
+  content: string;
+  timestamp: Date;
+  sqlQuery?: string;
+  table?: string;
+  chart?: any;
 }
 
-export interface TableSchema {
-  id: string;
-  name: string;
-  columns: Column[];
-  rowCount: number;
-  selected: boolean;
-}
-
-export interface Column {
-  name: string;
-  type: string;
-  description?: string;
-}
-
-export interface TeamMember {
-  id: string;
-  name: string;
-  role: string;
-  avatar: string;
-  bio: string;
-}
-
-export interface FAQItem {
-  question: string;
-  answer: string;
-}
+export type TabId = 'chat' | 'analytics' | 'data' | 'settings';
 
 export interface ChartData {
   type: 'bar' | 'line' | 'pie' | 'scatter';

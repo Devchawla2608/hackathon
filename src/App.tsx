@@ -1,37 +1,35 @@
 import React, { useState } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import Header from './components/Header';
-import QuerySection from './components/QuerySection';
-import ResultsSection from './components/ResultsSection';
-import FileUploadSection from './components/FileUploadSection';
-import TableSelectorSection from './components/TableSelectorSection';
-import TutorialSection from './components/TutorialSection';
-import QnASection from './components/QnASection';
-import TeamSection from './components/TeamSection';
-import { SQLQuery, ChartData } from './types';
-import { AlertCircle } from 'lucide-react';
+import Sidebar from './components/Sidebar';
+import ChatInterface from './components/ChatInterface';
+import Navigation from './components/Navigation';
+import { MessageHistory, TabId } from './types';
+import { PanelLeftClose, PanelLeft } from 'lucide-react';
 
 function App() {
-  const [currentQuery, setCurrentQuery] = useState<SQLQuery | null>(null);
-  const [chartData, setChartData] = useState<ChartData | null>(null);
-  const [tableHTML, setTableHTML] = useState({});
-  const [conversation, setConversation] = useState<string>('');
-  const [chart, setChart] = useState<string>('');
-  const [table, setTable] = useState<string>('');
-  const [sql, setSql] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabId>('chat');
+  const [messageHistory, setMessageHistory] = useState<MessageHistory[]>([]);
+  const [currentChatId, setCurrentChatId] = useState<string>(Date.now().toString());
+  
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  
+  const handleNewChat = () => {
+    const newChatId = Date.now().toString();
+    setCurrentChatId(newChatId);
+  };
 
   const handleSubmitQuery = async (query: string) => {
     try {
-      setError(null); // Clear any previous errors
-      
-      // Generate random confidence for demo
-      const confidence = 0.7 + Math.random() * 0.25;
-      let chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-      chatHistory.push({
+      const newMessage = {
+        id: Date.now().toString(),
         role: 'user',
-        content: query
-      });
+        content: query,
+        timestamp: new Date(),
+      };
+
+      setMessageHistory(prev => [...prev, newMessage]);
 
       const response = await fetch(`http://127.0.0.1:8000/get_user_data`, {
         method: "POST",
@@ -39,8 +37,11 @@ function App() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          query: query,
-          chat_history: chatHistory
+          query,
+          chat_history: messageHistory.map(msg => ({
+            role: msg.role,
+            content: msg.content
+          }))
         }),
       });
 
@@ -49,111 +50,65 @@ function App() {
       }
 
       const data = await response.json();
-      console.log("response", data);
+      
+      const aiResponse = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: data.output || data.sql_query,
+        timestamp: new Date(),
+        sqlQuery: data.sql_query,
+        table: data.table?.body ? JSON.parse(data.table.body) : null,
+        chart: data.response_type === 'visualization' ? data : null,
+      };
 
-      if (data['response_type'] === 'conversation') {
-        setConversation(data['output']);
-        setTable('');
-        setSql('');
-        setChart('');
-        chatHistory.push({
-          role: 'user',
-          content: data['output']
-        });
-        localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-        return;
-      }
+      setMessageHistory(prev => [...prev, aiResponse]);
 
-      chatHistory.push({
-        role: 'user',
-        content: data['sql_query']
-      });
-      localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-      setTableHTML(JSON.parse(data['table'].body));
-      setTable(data['table'].body);
-      setSql(data['sql_query']);
-      setConversation('');
-
-      setTimeout(() => {
-        const sqlQuery = data['sql_query'];
-        
-        setCurrentQuery({
-          id: Math.random().toString(36).substring(2, 9),
-          naturalLanguage: query,
-          sqlQuery: sqlQuery,
-          confidence: confidence,
-          timestamp: new Date(),
-        });
-        
-        // Generate mock chart data
-        if (query.toLowerCase().includes('sales') || query.toLowerCase().includes('revenue')) {
-          setChartData({
-            type: 'bar',
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [
-              {
-                label: 'Sales',
-                data: [
-                  Math.floor(Math.random() * 1000 + 500),
-                  Math.floor(Math.random() * 1000 + 500),
-                  Math.floor(Math.random() * 1000 + 500),
-                  Math.floor(Math.random() * 1000 + 500),
-                  Math.floor(Math.random() * 1000 + 500),
-                  Math.floor(Math.random() * 1000 + 500),
-                ],
-                backgroundColor: '#6366F1',
-              }
-            ]
-          });
-        } else {
-          setChartData(null);
-        }
-      }, 1500);
-    } catch (err) {
-      console.error('Error fetching data:', err);
-      setError('Unable to connect to the backend server. Please ensure the server is running at http://127.0.0.1:8000');
-      setConversation('');
-      setTable('');
-      setSql('');
-      setChart('');
-      setCurrentQuery(null);
-      setChartData(null);
+    } catch (error) {
+      console.error('Error:', error);
+      setMessageHistory(prev => [...prev, {
+        id: Date.now().toString(),
+        role: 'error',
+        content: 'Failed to connect to the server. Please ensure it is running at http://127.0.0.1:8000',
+        timestamp: new Date(),
+      }]);
     }
   };
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
+      <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
         <Header />
-        <main className="container mx-auto px-4 py-8">
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-3 text-red-700 dark:text-red-400">
-              <AlertCircle className="w-5 h-5" />
-              <p>{error}</p>
-            </div>
-          )}
-          <QuerySection onSubmitQuery={handleSubmitQuery} />
-          <ResultsSection 
-            tableHTML={tableHTML} 
-            query={currentQuery} 
-            chartData={chartData} 
-            chart={chart} 
-            table={table} 
-            sql={sql} 
-            conversation={conversation} 
-          />
-          <FileUploadSection />
-          <TableSelectorSection />
-          <TutorialSection />
-          <QnASection />
-        </main>
-        <footer className="bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-8 px-4 transition-colors duration-300">
-          <div className="container mx-auto text-center">
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
-              © 2025 SQLVision. All rights reserved.
-            </p>
+        <div className="flex h-[calc(100vh-4rem)]">
+          <div 
+            className={`fixed inset-y-16 left-0 z-30 w-64 transform bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-300 ${
+              isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
+          >
+            <Sidebar
+              chats={messageHistory}
+              currentChatId={currentChatId}
+              onNewChat={handleNewChat}
+              onSelectChat={(id) => setCurrentChatId(id)}
+            />
           </div>
-        </footer>
+          
+          <button
+            onClick={toggleSidebar}
+            className="fixed bottom-4 left-4 z-40 p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg transition-colors duration-200"
+          >
+            {isSidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeft className="w-5 h-5" />}
+          </button>
+
+          <div className={`flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-0'} transition-all duration-300`}>
+            <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+            <main className="h-[calc(100vh-8rem)] p-4">
+              <ChatInterface
+                messages={messageHistory}
+                onSubmitQuery={handleSubmitQuery}
+              />
+            </main>
+          </div>
+        </div>
       </div>
     </ThemeProvider>
   );
