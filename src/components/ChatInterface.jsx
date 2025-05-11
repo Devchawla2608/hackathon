@@ -5,6 +5,7 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
   const [input, setInput] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [loadedRows, setLoadedRows] = useState(150);
+  const [isExporting, setIsExporting] = useState(false);
   const messagesEndRef = useRef(null);
   let recognition = null;
 
@@ -34,7 +35,6 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
 
       recognition.onend = () => {
         setIsListening(false);
-        // Extend listening for 4 seconds of silence
         setTimeout(() => {
           if (!recognition.recognizing) {
             recognition.start();
@@ -60,15 +60,45 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
     }
   };
 
-  const exportToCSV = (tableData) => {
-    const csvContent = "data:text/csv;charset=utf-8," + tableData;
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "export.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const convertHTMLTableToCSV = (tableHTML) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(tableHTML, 'text/html');
+    const rows = doc.querySelectorAll('tr');
+    const csvRows = [];
+
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('th, td');
+      const csvRow = Array.from(cells).map(cell => {
+        let text = cell.textContent.trim();
+        // Escape quotes and wrap in quotes if contains comma
+        if (text.includes(',') || text.includes('"')) {
+          text = `"${text.replace(/"/g, '""')}"`;
+        }
+        return text;
+      });
+      csvRows.push(csvRow.join(','));
+    });
+
+    return csvRows.join('\n');
+  };
+
+  const exportToCSV = async (tableData) => {
+    setIsExporting(true);
+    try {
+      const csvContent = convertHTMLTableToCSV(tableData);
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'export.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const renderTable = (table) => {
@@ -96,10 +126,23 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
             </p>
             <button
               onClick={() => exportToCSV(table)}
-              className="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+              disabled={isExporting}
+              className="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg disabled:bg-gray-400"
             >
-              <Download className="w-4 h-4 mr-2" />
-              Export to CSV
+              {isExporting ? (
+                <span className="inline-flex items-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Exporting...
+                </span>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export to CSV
+                </>
+              )}
             </button>
           </div>
         ) : totalRows > loadedRows ? (
@@ -208,3 +251,5 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
 };
 
 export default ChatInterface;
+
+export default ChatInterface
