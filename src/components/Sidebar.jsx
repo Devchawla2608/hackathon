@@ -29,3 +29,5 @@ const Sidebar = ({ messages }) => {
     </div>
   );
 };
+
+export default Sidebar
