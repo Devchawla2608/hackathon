@@ -1,10 +1,13 @@
-import React, { useRef, useEffect } from 'react';
-import { Send, User, Bot, AlertCircle } from 'lucide-react';
+import React, { useRef, useEffect, useState } from 'react';
+import { Send, User, Bot, AlertCircle, Mic, Download } from 'lucide-react';
 
 const ChatInterface = ({ messages, onSubmitQuery }) => {
-  const [input, setInput] = React.useState('');
+  const [input, setInput] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const [loadedRows, setLoadedRows] = useState(150);
   const messagesEndRef = useRef(null);
-  
+  let recognition = null;
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -13,12 +16,102 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
     scrollToBottom();
   }, [messages]);
 
+  const handleVoiceInput = () => {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert('Speech recognition is not supported in this browser.');
+      return;
+    }
+
+    if (!recognition) {
+      recognition = new window.webkitSpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+        // Extend listening for 4 seconds of silence
+        setTimeout(() => {
+          if (!recognition.recognizing) {
+            recognition.start();
+          }
+        }, 4000);
+      };
+    }
+
+    if (!isListening) {
+      setIsListening(true);
+      recognition.start();
+    } else {
+      setIsListening(false);
+      recognition.stop();
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (input.trim()) {
       onSubmitQuery(input);
       setInput('');
     }
+  };
+
+  const exportToCSV = (tableData) => {
+    const csvContent = "data:text/csv;charset=utf-8," + tableData;
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const renderTable = (table) => {
+    const rows = table.split('\n');
+    const totalRows = rows.length;
+    const displayRows = rows.slice(0, loadedRows).join('\n');
+
+    return (
+      <div className="mt-4">
+        <div className="max-h-[500px] overflow-y-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
+              {/* Table headers */}
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              <div dangerouslySetInnerHTML={{ __html: displayRows }} />
+            </tbody>
+          </table>
+        </div>
+        
+        {totalRows > 500 ? (
+          <div className="mt-4 text-center">
+            <p className="text-gray-600 dark:text-gray-400 mb-2">
+              Download the file to see more results
+            </p>
+            <button
+              onClick={() => exportToCSV(table)}
+              className="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export to CSV
+            </button>
+          </div>
+        ) : totalRows > loadedRows ? (
+          <button
+            onClick={() => setLoadedRows(prev => Math.min(prev + 50, totalRows))}
+            className="mt-4 text-indigo-600 dark:text-indigo-400 hover:underline"
+          >
+            Load more items...
+          </button>
+        ) : null}
+      </div>
+    );
   };
 
   const renderMessage = (message) => {
@@ -53,11 +146,7 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
             </pre>
           )}
           
-          {message.table && (
-            <div className="mt-2 overflow-x-auto">
-              <div dangerouslySetInnerHTML={{ __html: message.table }} />
-            </div>
-          )}
+          {message.table && renderTable(message.table)}
           
           {message.chart && (
             <div className="mt-2 h-64 bg-white rounded-lg p-4">
@@ -94,6 +183,17 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
             placeholder="Ask a question about your data..."
             className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
+          <button
+            type="button"
+            onClick={handleVoiceInput}
+            className={`p-2 rounded-lg transition-colors duration-200 ${
+              isListening
+                ? 'bg-red-500 hover:bg-red-600 text-white'
+                : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
+            }`}
+          >
+            <Mic className={`w-5 h-5 ${isListening ? 'animate-pulse' : ''}`} />
+          </button>
           <button
             type="submit"
             disabled={!input.trim()}

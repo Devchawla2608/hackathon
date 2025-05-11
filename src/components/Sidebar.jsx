@@ -1,41 +1,34 @@
 import React from 'react';
-import { Plus, MessageSquare } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 
-const Sidebar = ({ chats, currentChatId, onNewChat, onSelectChat }) => {
-  const chatTitles = chats.reduce((acc, msg) => {
-    if (!acc[msg.chatId]) {
-      acc[msg.chatId] = msg.content.slice(0, 30) + '...';
+const Sidebar = ({ messages }) => {
+  const chatGroups = messages.reduce((groups, message) => {
+    if (message.role === 'user') {
+      const date = new Date(message.timestamp).toLocaleDateString();
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(message);
     }
-    return acc;
+    return groups;
   }, {});
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <button
-          onClick={onNewChat}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors duration-200"
-        >
-          <Plus className="w-4 h-4" />
-          New Chat
-        </button>
-      </div>
-      
-      <div className="flex-1 overflow-y-auto p-2">
-        {Object.entries(chatTitles).map(([chatId, title]) => (
-          <button
-            key={chatId}
-            onClick={() => onSelectChat(chatId)}
-            className={`
-              w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left mb-1 transition-colors duration-200
-              ${currentChatId === chatId
-                ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
-                : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'}
-            `}
-          >
-            <MessageSquare className="w-4 h-4" />
-            <span className="truncate">{title}</span>
-          </button>
+      <div className="flex-1 overflow-y-auto p-4">
+        {Object.entries(chatGroups).reverse().map(([date, messages]) => (
+          <div key={date} className="mb-6">
+            <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">{date}</div>
+            {messages.reverse().map((message) => (
+              <div
+                key={message.id}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg mb-1 hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 cursor-pointer"
+              >
+                <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate text-sm">{message.content}</span>
+              </div>
+            ))}
+          </div>
         ))}
       </div>
     </div>
