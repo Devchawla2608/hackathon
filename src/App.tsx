@@ -91,11 +91,11 @@ function App() {
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+      <div className="min-h-screen bg-black text-gray-900 dark:text-white">
         <Header />
         <div className="flex h-[calc(100vh-5rem)]">
           <div 
-            className={`fixed inset-y-16 left-0 z-30 w-64 transform bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-300 ${
+            className={`fixed inset-y-16 left-0 z-30 w-64 transform bg-black border-r border-gray-800 transition-transform duration-300 ${
               isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
             }`}
           >
