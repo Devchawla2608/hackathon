@@ -107,7 +107,7 @@ function App() {
           
           <button
             onClick={toggleSidebar}
-            className="fixed bottom-4 left-4 z-40 p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg transition-colors duration-200"
+            className="fixed bottom-4 left-4 z-40 p-2 bg-black hover:bg-gray-900 text-white rounded-full shadow-lg transition-colors duration-200"
           >
             {isSidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeft className="w-5 h-5" />}
           </button>

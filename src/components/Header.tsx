@@ -9,8 +9,8 @@ const Header: React.FC = () => {
     <header className="w-full py-4 px-6 transition-colors duration-300 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center space-x-3">
-          <Database className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
-          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
+          <Database className="w-8 h-8 text-black dark:text-gray-300" />
+          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-black dark:from-gray-300 dark:to-white">
             SQLVision
           </h1>
         </div>
