@@ -78,11 +78,11 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
     return (
       <div className="mt-4">
         <div className="max-h-[500px] overflow-y-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
+          <table className="min-w-full divide-y divide-gray-800">
+            <thead className="bg-black sticky top-0">
               {/* Table headers */}
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-gray-800">
               <div dangerouslySetInnerHTML={{ __html: displayRows }} />
             </tbody>
           </table>
@@ -90,7 +90,7 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
         
         {totalRows > 500 ? (
           <div className="mt-4 text-center">
-            <p className="text-gray-600 dark:text-gray-400 mb-2">
+            <p className="text-gray-400 mb-2">
               Download the file to see more results
             </p>
             <button
@@ -104,7 +104,7 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
         ) : totalRows > loadedRows ? (
           <button
             onClick={() => setLoadedRows(prev => Math.min(prev + 50, totalRows))}
-            className="mt-4 text-gray-600 dark:text-gray-400 hover:underline"
+            className="mt-4 text-gray-400 hover:underline"
           >
             Load more items...
           </button>
@@ -124,7 +124,7 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
       >
         {!isUser && (
           <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-            isError ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'
+            isError ? 'bg-red-900 text-red-200' : 'bg-gray-900 text-gray-300'
           }`}>
             {isError ? <AlertCircle className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
           </div>
@@ -132,10 +132,10 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
         
         <div className={`max-w-[70%] rounded-lg p-4 ${
           isUser 
-            ? 'bg-black text-white' 
+            ? 'bg-black text-white border border-gray-800' 
             : isError
-              ? 'bg-red-50 text-red-600 border border-red-200'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+              ? 'bg-red-900 text-red-200 border border-red-800'
+              : 'bg-gray-900 text-white border border-gray-800'
         }`}>
           {(message?.sqlQuery == message?.content) ? (
             <p className="whitespace-pre-wrap">Here are your results</p>
@@ -146,13 +146,13 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
           {message.sqlQuery && (
             <div className="mt-2">
               <details className="group">
-                <summary className="flex items-center justify-between p-2 bg-gray-200 dark:bg-gray-700 rounded cursor-pointer">
+                <summary className="flex items-center justify-between p-2 bg-gray-900 rounded cursor-pointer">
                   <span className="font-medium">SQL Query</span>
                   <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </summary>
-                <pre className="mt-1 p-2 bg-gray-800 text-gray-200 rounded overflow-x-auto">
+                <pre className="mt-1 p-2 bg-black text-gray-300 rounded overflow-x-auto">
                   <code>{message.sqlQuery}</code>
                 </pre>
               </details>
@@ -160,7 +160,7 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
           )}
 
           {message.analysisStatement && (
-            <pre className="mt-2 p-2 bg-gray-800 text-gray-200 rounded overflow-x-auto">
+            <pre className="mt-2 p-2 bg-black text-gray-300 rounded overflow-x-auto">
               <code>{message.analysisStatement}</code>
             </pre>
           )}
@@ -168,8 +168,8 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
           {message.table && renderTable(message.table)}
           
           {message.chart && (
-            <div className="mt-2 h-64 bg-white rounded-lg p-4">
-              <div className="h-full flex items-center justify-center text-gray-500">
+            <div className="mt-2 h-64 bg-gray-900 rounded-lg p-4">
+              <div className="h-full flex items-center justify-center text-gray-400">
                 Chart Visualization Placeholder
               </div>
             </div>
@@ -177,8 +177,8 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
         </div>
         
         {isUser && (
-          <div className="flex-shrink-0 w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
-            <User className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          <div className="flex-shrink-0 w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center">
+            <User className="w-5 h-5 text-gray-300" />
           </div>
         )}
       </div>
@@ -187,10 +187,10 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
 
   const LoadingMessage = () => (
     <div className="flex gap-3 mb-4 justify-start">
-      <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 text-gray-600">
+      <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gray-900 text-gray-300">
         <Bot className="w-5 h-5" />
       </div>
-      <div className="max-w-[70%] rounded-lg p-4 bg-gray-100 dark:bg-gray-800">
+      <div className="max-w-[70%] rounded-lg p-4 bg-gray-900">
         <div className="flex items-center space-x-2">
           <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"></div>
           <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
@@ -203,23 +203,23 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
   const WelcomeScreen = () => (
     <div className="absolute inset-0 flex items-center justify-center">
       <div className="text-center p-6 max-w-md">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-          <Bot className="w-8 h-8 text-gray-600" />
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-900 flex items-center justify-center">
+          <Bot className="w-8 h-8 text-gray-300" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Hello Deepanshu!</h2>
-        <p className="text-gray-600 dark:text-gray-300 mb-6">
+        <h2 className="text-2xl font-bold text-white mb-2">Hello Deepanshu!</h2>
+        <p className="text-gray-400 mb-6">
           How can I assist you with your retail database queries today?
         </p>
         <div className="space-y-2">
           <button 
             onClick={() => setInput('Show me top sales')}
-            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-gray-800 dark:text-gray-200 w-full text-left"
+            className="px-4 py-2 bg-gray-900 hover:bg-gray-800 rounded-lg text-white w-full text-left"
           >
             Show me top sales
           </button>
           <button 
             onClick={() => setInput('What are the recent transactions?')}
-            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-gray-800 dark:text-gray-200 w-full text-left"
+            className="px-4 py-2 bg-gray-900 hover:bg-gray-800 rounded-lg text-white w-full text-left"
           >
             What are the recent transactions?
           </button>
@@ -229,7 +229,7 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
   );
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 relative">
+    <div className="flex flex-col h-full bg-black relative">
       <div 
         ref={messagesContainerRef}
         className="flex-1 overflow-y-auto p-4 relative"
@@ -241,14 +241,14 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
         <div ref={messagesEndRef} />
       </div>
       
-      <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
+      <div className="border-t border-gray-800 p-4 bg-black">
         <form onSubmit={handleSubmit} className="flex gap-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question about your data..."
-            className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+            className="flex-1 px-4 py-3 rounded-lg border border-gray-800 bg-gray-900 text-white focus:ring-2 focus:ring-gray-700 focus:border-gray-700"
             disabled={isLoading}
           />
           <button
@@ -257,8 +257,8 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
             disabled={isLoading}
             className={`p-3 rounded-lg transition-colors duration-200 ${
               isListening
-                ? 'bg-red-500 hover:bg-red-600 text-white'
-                : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
+                ? 'bg-red-900 hover:bg-red-800 text-white'
+                : 'bg-gray-900 hover:bg-gray-800 text-white'
             } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <Mic className={`w-5 h-5 ${isListening ? 'animate-pulse' : ''}`} />
@@ -266,7 +266,7 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="p-3 bg-black hover:bg-gray-900 disabled:bg-gray-400 text-white rounded-lg transition-colors duration-200 flex items-center justify-center w-12"
+            className="p-3 bg-black hover:bg-gray-900 disabled:bg-gray-800 text-white rounded-lg transition-colors duration-200 flex items-center justify-center w-12 border border-gray-800"
           >
             {isLoading ? (
               <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
