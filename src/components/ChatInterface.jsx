@@ -10,7 +10,6 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
   const messagesContainerRef = useRef(null);
   let recognition = null;
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
@@ -96,7 +95,7 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
             </p>
             <button
               onClick={() => exportToCSV(table)}
-              className="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+              className="inline-flex items-center px-4 py-2 bg-black hover:bg-gray-900 text-white rounded-lg"
             >
               <Download className="w-4 h-4 mr-2" />
               Export to CSV
@@ -105,7 +104,7 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
         ) : totalRows > loadedRows ? (
           <button
             onClick={() => setLoadedRows(prev => Math.min(prev + 50, totalRows))}
-            className="mt-4 text-indigo-600 dark:text-indigo-400 hover:underline"
+            className="mt-4 text-gray-600 dark:text-gray-400 hover:underline"
           >
             Load more items...
           </button>
@@ -125,7 +124,7 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
       >
         {!isUser && (
           <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-            isError ? 'bg-red-100 text-red-600' : 'bg-indigo-100 text-indigo-600'
+            isError ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'
           }`}>
             {isError ? <AlertCircle className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
           </div>
@@ -133,7 +132,7 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
         
         <div className={`max-w-[70%] rounded-lg p-4 ${
           isUser 
-            ? 'bg-indigo-600 text-white' 
+            ? 'bg-black text-white' 
             : isError
               ? 'bg-red-50 text-red-600 border border-red-200'
               : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
@@ -188,7 +187,7 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
 
   const LoadingMessage = () => (
     <div className="flex gap-3 mb-4 justify-start">
-      <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-indigo-100 text-indigo-600">
+      <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 text-gray-600">
         <Bot className="w-5 h-5" />
       </div>
       <div className="max-w-[70%] rounded-lg p-4 bg-gray-100 dark:bg-gray-800">
@@ -204,8 +203,8 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
   const WelcomeScreen = () => (
     <div className="absolute inset-0 flex items-center justify-center">
       <div className="text-center p-6 max-w-md">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-indigo-100 flex items-center justify-center">
-          <Bot className="w-8 h-8 text-indigo-600" />
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+          <Bot className="w-8 h-8 text-gray-600" />
         </div>
         <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Hello Deepanshu!</h2>
         <p className="text-gray-600 dark:text-gray-300 mb-6">
@@ -249,7 +248,7 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question about your data..."
-            className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
             disabled={isLoading}
           />
           <button
@@ -267,7 +266,7 @@ const ChatInterface = ({ messages, onSubmitQuery }) => {
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="p-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white rounded-lg transition-colors duration-200 flex items-center justify-center w-12"
+            className="p-3 bg-black hover:bg-gray-900 disabled:bg-gray-400 text-white rounded-lg transition-colors duration-200 flex items-center justify-center w-12"
           >
             {isLoading ? (
               <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
